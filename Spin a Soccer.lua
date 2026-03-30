@@ -21,8 +21,6 @@ local Options = Fluent.Options
 
 -- Remote 
 local Remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
-local plr = game.Players.LocalPlayer
-local EquipRemote = Remote:WaitForChild("EquipCard")
 
 -- ตัวแปร
 local autoBuy = false
@@ -35,7 +33,13 @@ local selectedBuyPacks = {"Bronze"}
 local selectedOpenPacks = {"Bronze"}
 local selectedCrafts = {"Golden Boot"}
 
-local packOptions = {
+local openPacks = {
+    "Bronze","Silver","Gold","Platinum","Diamond","Bonded","Toxic","Shadow",
+    "Infernal","Corrupted","Cosmic","Eclipse","Hades","Heaven","Chaos",
+    "Ordain","Alpha","Omega","Genesis","Abyssal","Enigma","Oracle"
+}
+
+local buyPacks = {
     "Bronze","Silver","Gold","Platinum","Diamond","Toxic","Shadow",
     "Infernal","Corrupted","Cosmic","Eclipse","Hades","Heaven","Chaos",
     "Ordain","Alpha","Omega","Genesis","Abyssal","Enigma","Oracle"
@@ -52,7 +56,7 @@ do
     -- Dropdown Buy 
     local DropBuy = Tabs.Main:AddDropdown("BuyPacks", {
         Title = "Select Auto Buy",
-        Values = packOptions,
+        Values = buyPacks,
         Multi = true,
         Default = {"Bronze"},
     })
@@ -77,7 +81,7 @@ do
     -- Dropdown Open 
     local DropOpen = Tabs.Main:AddDropdown("OpenPacks", {
         Title = "Select Auto Open",
-        Values = packOptions,
+        Values = openPacks,
         Multi = true,
         Default = {"Bronze"},
     })
@@ -214,7 +218,7 @@ do
                 
                 if spinRemote then
                     
-                    if tick() - lastClaim > 600 then
+                    if tick() - lastClaim > 120 then
                         pcall(function()
                             spinRemote:FireServer("claim_free")
                         end)
