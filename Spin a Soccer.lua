@@ -214,7 +214,7 @@ do
                 
                 if spinRemote then
                     
-                    if tick() - lastClaim > 1800 then
+                    if tick() - lastClaim > 600 then
                         pcall(function()
                             spinRemote:FireServer("claim_free")
                         end)
