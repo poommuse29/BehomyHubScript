@@ -28,9 +28,12 @@ local EquipRemote = Remote:WaitForChild("EquipCard")
 local autoBuy = false
 local autoOpen = false
 local autoCollect = false
+local autoCraft = false
+local autoSpinwheel = false
 
 local selectedBuyPacks = {"Bronze"}
 local selectedOpenPacks = {"Bronze"}
+local selectedCrafts = {"Golden Boot"}
 
 local packOptions = {
     "Bronze","Silver","Gold","Platinum","Diamond","Toxic","Shadow",
@@ -42,7 +45,7 @@ do
     Fluent:Notify({
         Title = "VexHub",
         Content = "Script Loading...",
-        SubContent = "Spin A Soccer Card",
+        SubContent = "Have a Good Day :)",
         Duration = 5
     })
 
@@ -53,7 +56,6 @@ do
         Multi = true,
         Default = {"Bronze"},
     })
-
     DropBuy:OnChanged(function(value)
         selectedBuyPacks = {}
         for packName, isSelected in pairs(value) do
@@ -68,7 +70,6 @@ do
         Title = "Auto Buy",
         Default = false
     })
-
     ToggleBuy:OnChanged(function(value)
         autoBuy = value
     end)
@@ -80,7 +81,6 @@ do
         Multi = true,
         Default = {"Bronze"},
     })
-
     DropOpen:OnChanged(function(value)
         selectedOpenPacks = {}
         for packName, isSelected in pairs(value) do
@@ -95,9 +95,36 @@ do
         Title = "Auto Open",
         Default = false
     })
-
     ToggleOpen:OnChanged(function(value)
         autoOpen = value
+    end)
+
+    -- Dropdown Craft
+    local DropCraft = Tabs.Main:AddDropdown("AutoCraft", {
+        Title = "Select Auto Craft",
+        Values = {
+            "Golden Boot",
+            "Champions League",
+            "Ballon d'Or",
+            "Eternal Crown"
+        },
+        Multi = true,
+        Default = {},
+    })
+    DropCraft:OnChanged(function(value)
+        selectedCrafts = {}
+        for k,v in pairs(value) do
+            if v then table.insert(selectedCrafts, k) end
+        end
+    end)
+
+    -- Toggle Craft
+    local ToggleCraft = Tabs.Main:AddToggle("AutoCarft", {
+        Title = "Auto Carft",
+        Default = false
+    })
+    ToggleCraft:OnChanged(function(value)
+        autoCraft = value
     end)
 
     -- Toggle Collect
@@ -105,9 +132,16 @@ do
         Title = "Auto Collect",
         Default = false
     })
-
     ToggleCollect:OnChanged(function(value)
         autoCollect = value
+    end)
+
+    local ToggleSpin = Tabs.Main:AddToggle("AutoSpinwheel",{
+        Title = "Auto SpinWheel",
+        Default = false
+    })
+    ToggleSpin:OnChanged(function(value)
+        autoSpinwheel = value
     end)
 
     -- Loop Auto Buy 
@@ -155,7 +189,55 @@ do
         end
     end)
 
-    -- ===== Settings =====
+    -- Loop Auto Craft
+    task.spawn(function()
+        while true do
+            if autoCraft then
+                for _, item in ipairs(selectedCrafts) do
+                    pcall(function()
+                        Remote:WaitForChild("CraftTrophy"):FireServer(item)
+                    end)
+                    task.wait(0.5)
+                end
+            end
+            task.wait(0.5)
+        end
+    end)
+
+    -- Loop SpinWheel
+    task.spawn(function()
+        local spinRemote = Remote:FindFirstChild("SpinWheel")
+        local lastClaim = 0
+
+        while true do
+            if autoSpinwheel then
+                
+                if spinRemote then
+                    
+                    if tick() - lastClaim > 1800 then
+                        pcall(function()
+                            spinRemote:FireServer("claim_free")
+                        end)
+                        lastClaim = tick()
+                        task.wait(1)
+                    end
+
+                    pcall(function()
+                        spinRemote:FireServer("spin")
+                    end)
+
+                else
+                    warn("SpinWheel not found")
+                end
+
+                task.wait(15)
+            end
+
+            task.wait(0.5)
+        end
+    end)
+
+    -- Settings
     SaveManager:SetLibrary(Fluent)
     InterfaceManager:SetLibrary(Fluent)
     SaveManager:IgnoreThemeSettings()
